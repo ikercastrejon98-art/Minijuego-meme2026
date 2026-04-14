@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina PRO 😈</title>
+<title>Adivina o Humillado 🤡</title>
 
 <style>
 body {
     font-family: Arial;
-    background: #1e1e2e;
+    background: linear-gradient(135deg,#0f172a,#1e1e2e);
     color: white;
     text-align: center;
 }
@@ -15,20 +15,36 @@ body {
 .container {
     background: #2f3542;
     padding: 20px;
-    border-radius: 15px;
+    border-radius: 20px;
     display: inline-block;
+    box-shadow: 0 0 30px black;
 }
 
 button {
     padding: 10px;
     margin: 5px;
     cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    background: #ff4757;
+    color: white;
+}
+
+button:hover {
+    transform: scale(1.1);
 }
 
 #meme {
-    width: 200px;
-    display: none;
+    width: 220px;
     margin-top: 10px;
+    display: none;
+    border-radius: 10px;
+}
+
+.win { animation: glow 0.5s infinite alternate; }
+@keyframes glow {
+    from { box-shadow: 0 0 10px lime; }
+    to { box-shadow: 0 0 30px lime; }
 }
 </style>
 </head>
@@ -41,7 +57,6 @@ button {
 
 <input id="name" placeholder="Tu nombre">
 <br><br>
-
 <button onclick="startGame()">Jugar</button>
 
 <div id="game" style="display:none;">
@@ -55,10 +70,10 @@ button {
 
 <div id="end" style="display:none;">
     <h3 id="result"></h3>
-    <button onclick="startGame()">🔄 Volver a intentar</button>
+    <button onclick="startGame()">🔄 Otra vez</button>
 </div>
 
-<h3>🏆 TOP</h3>
+<h3>🏆 TOP PROS</h3>
 <ul id="ranking"></ul>
 
 </div>
@@ -69,7 +84,7 @@ let secret, lives, user;
 
 function startGame() {
     user = document.getElementById("name").value.trim();
-    if (!user) return alert("Pon nombre bro");
+    if (!user) return alert("Pon nombre 💀");
 
     secret = Math.floor(Math.random() * 10) + 1;
     lives = 3;
@@ -86,16 +101,32 @@ function updateLives() {
     document.getElementById("lives").innerText = "❤️".repeat(lives);
 }
 
+function randomMeme(type) {
+    const memes = {
+        win: [
+            "https://i.imgur.com/3ZQ3Z6F.gif",
+            "https://i.imgur.com/6X4KZQW.gif"
+        ],
+        lose: [
+            "https://i.imgur.com/j6qY6Qp.gif",
+            "https://i.imgur.com/Z4M7K6B.gif"
+        ],
+        high: [
+            "https://i.imgur.com/FW5RZ8C.gif"
+        ],
+        low: [
+            "https://i.imgur.com/8p0XK4R.gif"
+        ]
+    };
+
+    let list = memes[type];
+    return list[Math.floor(Math.random() * list.length)];
+}
+
 function showMeme(type) {
     const meme = document.getElementById("meme");
     meme.style.display = "block";
-
-    const memes = {
-        win: "https://i.imgur.com/3ZQ3Z6F.gif",
-        lose: "https://i.imgur.com/j6qY6Qp.gif"
-    };
-
-    meme.src = memes[type];
+    meme.src = randomMeme(type);
 }
 
 function check() {
@@ -103,7 +134,7 @@ function check() {
     let msg = document.getElementById("msg");
 
     if (isNaN(guess)) {
-        msg.innerText = "⚠️ Número inválido";
+        msg.innerText = "💀 ni escribir sabes";
         return;
     }
 
@@ -116,9 +147,11 @@ function check() {
         if (lives <= 0) {
             lose();
         } else if (guess < secret) {
-            msg.innerText = "📉 Muy bajo";
+            msg.innerText = "📉 Súbele crack";
+            showMeme("low");
         } else {
-            msg.innerText = "📈 Muy alto";
+            msg.innerText = "📈 bájale tantito";
+            showMeme("high");
         }
     }
 
@@ -126,15 +159,18 @@ function check() {
 }
 
 function win() {
-    document.getElementById("result").innerText = "🔥 GANASTE";
+    document.getElementById("result").innerText = "🔥 ERES DIOS";
+    document.body.classList.add("win");
     showMeme("win");
+    playSound("win");
     saveScore(100);
     endGame();
 }
 
 function lose() {
-    document.getElementById("result").innerText = "💀 Perdiste. Era " + secret;
+    document.getElementById("result").innerText = "💀 NPC DETECTED";
     showMeme("lose");
+    playSound("lose");
     endGame();
 }
 
@@ -158,9 +194,20 @@ function showRanking() {
 
     Object.entries(data)
     .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
     .forEach((p,i) => {
-        list.innerHTML += `<li>#${i+1} ${p[0]} - ${p[1]} pts</li>`;
+        let medal = ["🥇","🥈","🥉"][i] || "";
+        list.innerHTML += `<li>${medal} ${p[0]} - ${p[1]}</li>`;
     });
+}
+
+function playSound(type) {
+    let audio = new Audio(
+        type === "win"
+        ? "https://www.myinstants.com/media/sounds/victory.mp3"
+        : "https://www.myinstants.com/media/sounds/fail-trombone.mp3"
+    );
+    audio.play();
 }
 
 showRanking();
