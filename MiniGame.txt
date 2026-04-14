@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Adivina PRO 😈</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #1e1e2e;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    background: #2f3542;
+    padding: 20px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+#meme {
+    width: 200px;
+    display: none;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>¿Pro o NPC? 😈</h2>
+
+<input id="name" placeholder="Tu nombre">
+<br><br>
+
+<button onclick="startGame()">Jugar</button>
+
+<div id="game" style="display:none;">
+    <p id="lives"></p>
+    <input id="guess" type="number">
+    <br>
+    <button onclick="check()">Adivinar</button>
+    <p id="msg"></p>
+    <img id="meme">
+</div>
+
+<div id="end" style="display:none;">
+    <h3 id="result"></h3>
+    <button onclick="startGame()">🔄 Volver a intentar</button>
+</div>
+
+<h3>🏆 TOP</h3>
+<ul id="ranking"></ul>
+
+</div>
+
+<script>
+
+let secret, lives, user;
+
+function startGame() {
+    user = document.getElementById("name").value.trim();
+    if (!user) return alert("Pon nombre bro");
+
+    secret = Math.floor(Math.random() * 10) + 1;
+    lives = 3;
+
+    document.getElementById("game").style.display = "block";
+    document.getElementById("end").style.display = "none";
+    document.getElementById("msg").innerText = "";
+    document.getElementById("meme").style.display = "none";
+
+    updateLives();
+}
+
+function updateLives() {
+    document.getElementById("lives").innerText = "❤️".repeat(lives);
+}
+
+function showMeme(type) {
+    const meme = document.getElementById("meme");
+    meme.style.display = "block";
+
+    const memes = {
+        win: "https://i.imgur.com/3ZQ3Z6F.gif",
+        lose: "https://i.imgur.com/j6qY6Qp.gif"
+    };
+
+    meme.src = memes[type];
+}
+
+function check() {
+    let guess = Number(document.getElementById("guess").value);
+    let msg = document.getElementById("msg");
+
+    if (isNaN(guess)) {
+        msg.innerText = "⚠️ Número inválido";
+        return;
+    }
+
+    if (guess === secret) {
+        win();
+    } else {
+        lives--;
+        updateLives();
+
+        if (lives <= 0) {
+            lose();
+        } else if (guess < secret) {
+            msg.innerText = "📉 Muy bajo";
+        } else {
+            msg.innerText = "📈 Muy alto";
+        }
+    }
+
+    document.getElementById("guess").value = "";
+}
+
+function win() {
+    document.getElementById("result").innerText = "🔥 GANASTE";
+    showMeme("win");
+    saveScore(100);
+    endGame();
+}
+
+function lose() {
+    document.getElementById("result").innerText = "💀 Perdiste. Era " + secret;
+    showMeme("lose");
+    endGame();
+}
+
+function endGame() {
+    document.getElementById("game").style.display = "none";
+    document.getElementById("end").style.display = "block";
+}
+
+function saveScore(points) {
+    let data = JSON.parse(localStorage.getItem("rank")) || {};
+    data[user] = (data[user] || 0) + points;
+    localStorage.setItem("rank", JSON.stringify(data));
+    showRanking();
+}
+
+function showRanking() {
+    let data = JSON.parse(localStorage.getItem("rank")) || {};
+    let list = document.getElementById("ranking");
+
+    list.innerHTML = "";
+
+    Object.entries(data)
+    .sort((a,b)=>b[1]-a[1])
+    .forEach((p,i) => {
+        list.innerHTML += `<li>#${i+1} ${p[0]} - ${p[1]} pts</li>`;
+    });
+}
+
+showRanking();
+
+</script>
+
+</body>
+</html>
